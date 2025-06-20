@@ -1,39 +1,42 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
-import 'react-native-reanimated';
+import React, { useEffect } from 'react'
+import { Slot, SplashScreen, Stack } from 'expo-router';
+import '../global.css';
+import {useFonts} from 'expo-font';
 
-import { useColorScheme } from '@/hooks/useColorScheme';
-
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+const RootLayout = () => {
+  const [fontsLoaded, error] = useFonts({
+    "Micro5": require("../assets/fonts/Micro5.ttf"),
   });
 
+  const [isSplashScreenVisible, setSplashScreenvisible] = React.useState(true);
+
   useEffect(() => {
-    if (loaded) {
+    if (error) throw error;
+    
+    if (fontsLoaded){
+      setSplashScreenvisible(true);
       SplashScreen.hideAsync();
-    }
-  }, [loaded]);
+    } 
+  }, [fontsLoaded,error]);
 
-  if (!loaded) {
-    return null;
-  }
-
-  return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
-  );
+  if (!fontsLoaded && !error) return null;
+  if (!isSplashScreenVisible || !fontsLoaded) return null;
+  
+  return(
+  <Stack
+    screenOptions={{
+      headerShown: false,
+      animation: 'fade',  
+      gestureEnabled: true,           
+      animationDuration: 400,
+      contentStyle: {backgroundColor: "#F1D895"},         
+    }}
+  >
+    <Stack.Screen name="index" options={{headerShown: false}} />
+  </Stack>
+  )
 }
+
+export default RootLayout
